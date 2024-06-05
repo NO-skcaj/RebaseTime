@@ -12,7 +12,7 @@
 #include <frc/kinematics/SwerveDriveKinematics.h>
 #include <frc/kinematics/SwerveDriveOdometry.h>
 
-#include "SwerveModule.h"
+#include "modules/SwerveModule.h"
 
 /**
  * Represents a swerve drive style drivetrain.
