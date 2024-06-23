@@ -6,51 +6,65 @@
 
 #include <numbers>
 
-#include <frc/Encoder.h>
 #include <frc/controller/PIDController.h>
 #include <frc/controller/ProfiledPIDController.h>
 #include <frc/controller/SimpleMotorFeedforward.h>
+
 #include <frc/kinematics/SwerveModulePosition.h>
 #include <frc/kinematics/SwerveModuleState.h>
-#include <frc/motorcontrol/PWMSparkMax.h>
+
+#include <frc/geometry/Rotation2d.h>
+#include <frc/geometry/Pose2d.h>
+
 #include <units/angular_velocity.h>
 #include <units/time.h>
 #include <units/velocity.h>
 #include <units/voltage.h>
 
+#include <rev/CANSparkMax.h>
+#include <rev/CANSparkLowLevel.h>
+
+#include <ctre/phoenix/sensors/CANCoder.h>
+#include <ctre/phoenix6/TalonFX.hpp>
+
+#include "modules/SwerveModule.h"
+#include "utils/hardware.hpp"
+#include "Constants.hpp"
+
+using namespace hardware;
+
 class SwerveModule {
- public:
-  SwerveModule(int driveMotorChannel, int turningMotorChannel,
-               int driveEncoderChannelA, int driveEncoderChannelB,
-               int turningEncoderChannelA, int turningEncoderChannelB);
-  frc::SwerveModuleState GetState() const;
-  frc::SwerveModulePosition GetPosition() const;
-  void SetDesiredState(const frc::SwerveModuleState& state);
+    public:
+        SwerveModule(int driveMotorChannel, 
+                     int turningMotorChannel,
+                     int turningEncoderChannel,
+                     gyro::navx* gyro);
 
- private:
-  static constexpr auto kWheelRadius = 0.0508_m;
-  static constexpr int kEncoderResolution = 4096;
+        frc::SwerveModuleState GetState();
 
-  static constexpr auto kModuleMaxAngularVelocity =
-      std::numbers::pi * 1_rad_per_s;  // radians per second
-  static constexpr auto kModuleMaxAngularAcceleration =
-      std::numbers::pi * 2_rad_per_s / 1_s;  // radians per second^2
+        frc::SwerveModulePosition GetModulePosition();
+        
+        void SetDesiredState(const frc::SwerveModuleState& state);
 
-  frc::PWMSparkMax m_driveMotor;
-  frc::PWMSparkMax m_turningMotor;
+    private:
+        static constexpr auto kWheelRadius = 0.0508_m;
 
-  frc::Encoder m_driveEncoder;
-  frc::Encoder m_turningEncoder;
+        /// @brief What was last outputed to the motors
+        frc::SwerveModuleState current_state;
 
-  frc::PIDController m_drivePIDController{1.0, 0, 0};
-  frc::ProfiledPIDController<units::radians> m_turningPIDController{
-      1.0,
-      0.0,
-      0.0,
-      {kModuleMaxAngularVelocity, kModuleMaxAngularAcceleration}};
+        gyro::navx* Gyro;
 
-  frc::SimpleMotorFeedforward<units::meters> m_driveFeedforward{1_V,
-                                                                3_V / 1_mps};
-  frc::SimpleMotorFeedforward<units::radians> m_turnFeedforward{
-      1_V, 0.5_V / 1_rad_per_s};
+        // *** DRIVE MOTORS *** //
+
+        motors::TalonFX     d_motor;
+
+        // *** ANGLE MOTORS *** //
+
+        // motors::CANSparkMax t_motor;
+        
+        // *** Utils *** //
+        /// @brief  Converts funny silly Position Status Signal Object to "normal people units" aka schizo wpilib units lib
+        /// @param rotations - Result from TalonFX GetPosition.GetValue()
+        /// @return usable units for odometry
+        units::meter_t rotationsToMeters(units::turn_t rotations);
 };
