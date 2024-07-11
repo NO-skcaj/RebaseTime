@@ -21,13 +21,8 @@
 #include <units/velocity.h>
 #include <units/voltage.h>
 
-#include <rev/CANSparkMax.h>
-#include <rev/CANSparkLowLevel.h>
+#include <numbers>
 
-#include <ctre/phoenix/sensors/CANCoder.h>
-#include <ctre/phoenix6/TalonFX.hpp>
-
-#include "modules/SwerveModule.h"
 #include "utils/hardware.hpp"
 #include "Constants.hpp"
 
@@ -37,8 +32,7 @@ class SwerveModule {
     public:
         SwerveModule(int driveMotorChannel, 
                      int turningMotorChannel,
-                     int turningEncoderChannel,
-                     gyro::navx* gyro);
+                     int turningEncoderChannel);
 
         frc::SwerveModuleState GetState();
 
@@ -51,8 +45,6 @@ class SwerveModule {
 
         /// @brief What was last outputed to the motors
         frc::SwerveModuleState current_state;
-
-        gyro::navx* Gyro;
 
         // *** DRIVE MOTORS *** //
 

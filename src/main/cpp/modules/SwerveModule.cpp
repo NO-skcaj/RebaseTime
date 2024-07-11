@@ -2,23 +2,15 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-#include "modules/SwerveModule.h"
-
-#include "Constants.hpp"
-
-#include <numbers>
-
-#include <frc/geometry/Rotation2d.h>
+#include "modules/SwerveModule.hpp"
 
 using namespace hardware;
+using namespace constants;
 
 SwerveModule::SwerveModule(int driveMotorChannel, 
                            int turningMotorChannel,
-                           int turningEncoderChannel,
-                           gyro::navx* gyro) 
+                           int turningEncoderChannel) 
 {
-    this->Gyro = gyro;
-
     this->d_motor.AddMotor(driveMotorChannel, hardware::motors::motor_type::DRIVE);
 
     this->d_motor.Config(swerve::DRIVE_P, 
@@ -26,7 +18,9 @@ SwerveModule::SwerveModule(int driveMotorChannel,
                          swerve::DRIVE_D, 
                          swerve::DRIVE_AMPERAGE);
     
-    // this->t_motor.Config(turningMotorChannel, ANGLE_P, ANGLE_I, ANGLE_D, ANGLE_AMPERAGE);
+    // this->t_motor.AddMotor(turningMotorChannel, hardware::motors::motor_type::DRIVE, true);
+
+    // this->t_motor.Config(ANGLE_P, ANGLE_I, ANGLE_D, ANGLE_AMPERAGE);
 
     // this->t_motor.GetEncoder(turningEncoderChannel);
     // this->t_motor.SnapZero();
@@ -46,11 +40,8 @@ frc::SwerveModulePosition SwerveModule::GetModulePosition()
     };
 }
 
-void SwerveModule::SetDesiredState(const frc::SwerveModuleState& referenceState) 
+void SwerveModule::SetDesiredState(const frc::SwerveModuleState& state) 
 {
-    
-    frc::SwerveModuleState state = frc::SwerveModuleState::Optimize(referenceState, frc::Rotation2d(units::degree_t(this->Gyro->getHeading())));
-
     double Speed = state.speed();
     double Angle = units::unit_cast<double>(state.angle.Radians() * 0.01745);
     

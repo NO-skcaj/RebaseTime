@@ -1,59 +1,62 @@
-#pragma once
+// #pragma once
 
-#include "utils/LimeLightHelper.hpp"
+// #include "utils/LimeLightHelper.hpp"
 
-class Vision
-{
-    public:
-        Vision(camera_type cam);
+// #include <cameraserver/CameraServer.h>
+// #include <opencv2/imgproc/imgproc.hpp>
 
-        // Pos
-        frc::Pose2d GetVisionPosition();
+// class Vision
+// {
+//     public:
+//         Vision(Vision::camera_type cam);
 
-        // Camera
-        void StartCams();
+//         // Pos
+//         frc::Pose2d GetVisionPosition();
 
-        // You'll want 1 Pos and 1 Sight camera
-        // Pos does Pos estimation among other things
-        // Sight gives an output to NT
-        enum camera_type
-        {
-            // Pos
-            PHOTON,
-            LIMELIGHT,
+//         // Camera
+//         void StartCams();
 
-            // Sight
-            GENERIC_USB
-        };
-    private:
-        static void VisionOnAnotherThread()
-        {
-            cs::UsbCamera camera = frc::CameraServer::StartAutomaticCapture(); // gets camera
+//         // You'll want 1 Pos and 1 Sight camera
+//         // Pos does Pos estimation among other things
+//         // Sight gives an output to NT
+//         enum camera_type
+//         {
+//             // Pos
+//             PHOTON,
+//             LIMELIGHT,
 
-            camera.SetResolution(640, 480); // sets resolution
+//             // Sight
+//             GENERIC_USB
+//         };
+//     private:
+//         static void VisionOnAnotherThread()
+//         {
+//             cs::UsbCamera camera = frc::CameraServer::StartAutomaticCapture(); // gets camera
 
-            // Get a CvSink. This will capture Mats from the Camera
-            cs::CvSink cvSink = frc::CameraServer::GetVideo();
+//             camera.SetResolution(640, 480); // sets resolution
 
-            // Setup a CvSource. This will send images back to the Dashboard
-            cs::CvSource outputStream = frc::CameraServer::PutVideo("Rectangle", 640, 480);
+//             // Get a CvSink. This will capture Mats from the Camera
+//             cs::CvSink cvSink = frc::CameraServer::GetVideo();
 
-            cv::Mat mat;
-            while (true) 
-            {
-                if (cvSink.GrabFrame(mat) == 0) 
-                {
-                    outputStream.NotifyError(cvSink.GetError());
-                    continue;
-                }
-                // Put a rectangle on the image
-                rectangle(mat, cv::Point(100, 100), cv::Point(400, 400), cv::Scalar(255, 255, 255), 5);
-                // An idea for this is to have all of our basic telemetry data on the camera output, not suggested though
+//             // Setup a CvSource. This will send images back to the Dashboard
+//             cs::CvSource outputStream = frc::CameraServer::PutVideo("Rectangle", 640, 480);
 
-                // Give the output stream a new image to display
-                outputStream.PutFrame(mat);
-            }
-        }
+//             cv::Mat mat;
+//             while (true) 
+//             {
+//                 if (cvSink.GrabFrame(mat) == 0) 
+//                 {
+//                     outputStream.NotifyError(cvSink.GetError());
+//                     continue;
+//                 }
+//                 // Put a rectangle on the image
+//                 rectangle(mat, cv::Point(100, 100), cv::Point(400, 400), cv::Scalar(255, 255, 255), 5);
+//                 // An idea for this is to have all of our basic telemetry data on the camera output, not suggested though
 
-        enum pos_type {P, L};
-}
+//                 // Give the output stream a new image to display
+//                 outputStream.PutFrame(mat);
+//             }
+//         };
+
+//         enum pos_type {P, L};
+// }

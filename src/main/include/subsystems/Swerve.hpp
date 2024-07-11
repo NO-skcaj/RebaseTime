@@ -13,30 +13,21 @@
 #include <frc/kinematics/SwerveDriveKinematics.h>
 #include <frc/kinematics/SwerveDriveOdometry.h>
 
-#include "modules/SwerveModule.h"
+#include <frc2/command/Subsystem.h>
+
+#include <pathplanner/lib/auto/AutoBuilder.h>
+#include <pathplanner/lib/util/PathPlannerLogging.h>
+
+#include "modules/SwerveModule.hpp"
 #include "utils/hardware.hpp"
+#include "Constants.hpp"
 
 /**
- * Represents a swerve drive style drivetrain.
+ * Represents a swerve drive style Swerve.
  */
-class Drivetrain {
+class Swerve : public frc2::Subsystem {
     public:
-        Drivetrain(hardware::gyro::navx* gyro) 
-        { 
-            // AHHHHHHHHH i hate pointers, but they work sometimes
-            this->Gyro = gyro;
-            gyro->resetGyro();
-
-            SwerveModule fl{1, 11, 21, Gyro}; // init all the Swerve Modules
-            SwerveModule fr{2, 12, 22, Gyro}; // Drive motor, Turning motor, Turning encoder
-            SwerveModule bl{3, 13, 23, Gyro};
-            SwerveModule br{4, 14, 24, Gyro};
-
-            this->m_frontLeft  = &fl;
-            this->m_frontRight = &fr;
-            this->m_backLeft   = &bl;
-            this->m_backRight  = &br;
-        }
+        Swerve(hardware::gyro::navx* gyro);
 
         void Drive(units::meters_per_second_t xSpeed,
                     units::meters_per_second_t ySpeed, 
@@ -44,28 +35,34 @@ class Drivetrain {
                     bool fieldRelative, 
                     units::second_t period);
 
+        void SetModuleStates(wpi::array<frc::SwerveModuleState, 4> states);
+
+        void ResetOdometry(frc::Pose2d pose = frc::Pose2d());
+
         void UpdateOdometry();
 
-        static constexpr auto kMaxSpeed = 3.0_mps;  // 3 meters per second
-        static constexpr units::radians_per_second_t kMaxAngularSpeed{
-        std::numbers::pi};  // 1/2 rotation per second
+        frc::ChassisSpeeds GetSpeeds();
 
-    private:
-        hardware::gyro::navx* Gyro;
+        frc::Pose2d GetPose();
+
+        frc::SwerveDriveKinematics<4> GetKinematics();
 
         frc::Translation2d m_frontLeftLocation {+0.381_m, +0.381_m};
         frc::Translation2d m_frontRightLocation{+0.381_m, -0.381_m};
         frc::Translation2d m_backLeftLocation  {-0.381_m, +0.381_m};
         frc::Translation2d m_backRightLocation {-0.381_m, -0.381_m};
 
+        frc::SwerveDriveKinematics<4> m_kinematics{
+            m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation,
+            m_backRightLocation};
+
+    private:
+        hardware::gyro::navx* Gyro;
+
         SwerveModule* m_frontLeft;  // init all the Swerve Modules
         SwerveModule* m_frontRight; // Drive motor, Turning motor, Turning encoder
         SwerveModule* m_backLeft;
         SwerveModule* m_backRight;
-
-        frc::SwerveDriveKinematics<4> m_kinematics{
-            m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation,
-            m_backRightLocation};
 
         frc::SwerveModulePosition initModPos[4];
 
